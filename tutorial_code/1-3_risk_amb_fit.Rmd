@@ -42,7 +42,6 @@ behav <- here("data", "risk_amb_gambling.csv") %>%
   read_csv(show_col_types = FALSE)
 ```
 
-
 # Introduction
 
 In our last tutorial, we tried our hand at simulating behavior from a subjective utility model, given an agent's risk and ambiguity preferences. We found that simulating a model's predictions / behaviors can be useful for understanding exactly what the model is doing, and why. This can be very helpful when we are working with new or unfamiliar models.
@@ -150,10 +149,9 @@ And there we have it: the likelihood of observing the participant's choice on ea
 
 ## Exercises: manually maximizing likelihood
 
-1. Try plotting subject 9's choices. Every unique trial type (i.e., combination of gamble type, gamble amount, probability of winning, and ambiguity level) was sampled twice, so you might find it useful to summarize over those variables before plotting.
+1.  Try plotting subject 9's choices. Every unique trial type (i.e., combination of gamble type, gamble amount, probability of winning, and ambiguity level) was sampled twice, so you might find it useful to summarize over those variables before plotting.
 
-2. What do you notice about this subject's choices? Knowing this, try to manually guess values of $\alpha$ and $\beta$ that increase the likelihood of subject 9's choices, when the gamble amount is \$1.60. What seems to work, and what doesn't?
-
+2.  What do you notice about this subject's choices? Knowing this, try to manually guess values of $\alpha$ and $\beta$ that increase the likelihood of subject 9's choices, when the gamble amount is \$1.60. What seems to work, and what doesn't?
 
 # Optimization
 
@@ -248,8 +246,8 @@ behav %>%
 
 We're almost there! We need a function that returns the overall (negative log) likelihood, summed over all trials. As input, it should take the following as arguments:
 
-1. A vector of numbers, as long as the number of free parameters, containing the most recent guesses about the parameter values
-2. A dataframe containing all relevant information for computing the negative log-likelihood
+1.  A vector of numbers, as long as the number of free parameters, containing the most recent guesses about the parameter values
+2.  A dataframe containing all relevant information for computing the negative log-likelihood
 
 You might be wondering why we're passing in a vector of guesses about the parameter values, then unpacking them within the function. This will be made clearer in a minute.
 
@@ -316,13 +314,13 @@ amb_risk_obj_fun <- function(param_guesses, gambling_data) {
 
 Alrighty, it took a few steps, but now we've got an objective function in hand! Now let's actually run the optimizer. There are a few things to note about the example below.
 
-1. We have to provide the optimizer with an initial vector of parameter values, which will be the starting point from which the optimizer will look for a solution. This is why we specified the parameter guesses as a vector in our objective function. If you input the same starting values as I have, you will most likely converge upon the exact same answer.
+1.  We have to provide the optimizer with an initial vector of parameter values, which will be the starting point from which the optimizer will look for a solution. This is why we specified the parameter guesses as a vector in our objective function. If you input the same starting values as I have, you will most likely converge upon the exact same answer.
 
-2. The objective function is provided as an argument to `fn`, *without* any of its own arguments.
+2.  The objective function is provided as an argument to `fn`, *without* any of its own arguments.
 
-3. Our objective function has an argument for `gambling_data`, and so when you call `optim`, you need to provide that named argument. 
+3.  Our objective function has an argument for `gambling_data`, and so when you call `optim`, you need to provide that named argument.
 
-4. Here, we provide a control argument specifying the maximum number of guesses the the optimizer is allowed to make. This can be useful for limiting how long the optimizer is allowed to search before giving up. Here, we've set the maximum number of iterations to 1000.
+4.  Here, we provide a control argument specifying the maximum number of guesses the the optimizer is allowed to make. This can be useful for limiting how long the optimizer is allowed to search before giving up. Here, we've set the maximum number of iterations to 1000.
 
 ```{r barebones-optim}
 optim(
@@ -337,16 +335,15 @@ The result comes in the form of a somewhat cryptic-looking named list. The entry
 
 ### Exercises: Optimization
 
-1. R makes widespread use of a construct called the ***ellipsis***, written as `...`, which can serve a number of very useful purposes. Try doing a web search for examples. One such purpose is to pass named arguments from one function to another. You might have wondered how `optim` knows to pass along the correct arguments to our objective function. The answer is that `optim` specifies ellipses in its function call, and that under the hood, `optim` passes along any extra named arguments to the function being optimized. As a test, see what happens when you change the argument `gambling_data = behav` to `my_data = behav`...
+1.  R makes widespread use of a construct called the ***ellipsis***, written as `...`, which can serve a number of very useful purposes. Try doing a web search for examples. One such purpose is to pass named arguments from one function to another. You might have wondered how `optim` knows to pass along the correct arguments to our objective function. The answer is that `optim` specifies ellipses in its function call, and that under the hood, `optim` passes along any extra named arguments to the function being optimized. As a test, see what happens when you change the argument `gambling_data = behav` to `my_data = behav`...
 
-2. The starting guesses can have a biasing impact on where the optimizer ends up. Try changing these initial guesses to something larger (e.g., try `10, 10, 10`), and see what happens. Then, try changing the initial guess to `1, 1, 1`... Compare that output to what we started with, when we initially guessed `1, 0, 1`. This exercise encourages you to think carefully about what values are reasonable starting places, not only for calling the optimizer, but also when writing your models / objective functions. In other words: values in the range $\pm 1$ are often reasonable starting guesses, *and* you should consider writing your equations in such a manner that reasonable behaviors can be often/mostly be found when parameters live in the range $\pm 1$.
+2.  The starting guesses can have a biasing impact on where the optimizer ends up. Try changing these initial guesses to something larger (e.g., try `10, 10, 10`), and see what happens. Then, try changing the initial guess to `1, 1, 1`... Compare that output to what we started with, when we initially guessed `1, 0, 1`. This exercise encourages you to think carefully about what values are reasonable starting places, not only for calling the optimizer, but also when writing your models / objective functions. In other words: values in the range $\pm 1$ are often reasonable starting guesses, *and* you should consider writing your equations in such a manner that reasonable behaviors can be often/mostly be found when parameters live in the range $\pm 1$.
 
-3. The standard operating procedure for optimization is to run the optimizer many times. Each time, you'll randomly generate starting values in a *reasonable* range. Whatever set of parameter values *best* maximizes the likelihood is the *single* set of parameters that you'll use for inference. Try writing a script (it doesn't have to be polished) that does this, and try running the optimizer a few times. You may notice instances in which changes in the parameter values result in a greater/lesser likelihood, and you may also notice instances in which parameter value differences still result in the same likelihood. What accounts for both of these potential outcomes?
+3.  The standard operating procedure for optimization is to run the optimizer many times. Each time, you'll randomly generate starting values in a *reasonable* range. Whatever set of parameter values *best* maximizes the likelihood is the *single* set of parameters that you'll use for inference. Try writing a script (it doesn't have to be polished) that does this, and try running the optimizer a few times. You may notice instances in which changes in the parameter values result in a greater/lesser likelihood, and you may also notice instances in which parameter value differences still result in the same likelihood. What accounts for both of these potential outcomes?
 
-4. Subject 2 is a great datapoint, not in the sense that they did a particularly good job, but in the sense that they behaved so weirdly that it can help us learn something. Without looking at their behavior, run the optimizer using the neutral starting guess `1, 0, 1`. What do you notice about the results? How would you interpret the estimated parameters, if you took them at face value? Now, take a look at their behavior, either by examining the table or by plotting their decisions. What does this teach us about computational modeling?
+4.  Subject 2 is a great datapoint, not in the sense that they did a particularly good job, but in the sense that they behaved so weirdly that it can help us learn something. Without looking at their behavior, run the optimizer using the neutral starting guess `1, 0, 1`. What do you notice about the results? How would you interpret the estimated parameters, if you took them at face value? Now, take a look at their behavior, either by examining the table or by plotting their decisions. What does this teach us about computational modeling?
 
-5. For the purpose of learning, subject 4 is also instructive. Do the same thing for subject 4 as you did for subject 2.
-
+5.  For the purpose of learning, subject 4 is also instructive. Do the same thing for subject 4 as you did for subject 2.
 
 # Goodness-of-fit
 
@@ -397,10 +394,9 @@ calculate_bic(
 
 ### Exercise: BIC
 
-1. The BIC is most useful for comparing the likelihoods of competing models, and assessing which of those models best fits the data. To make this concrete, try specifying an objective function that only models risk preference, not ambiguity preference. Estimate parameters for this model using subject 9's data, then calculate the BIC. How does the risk-only model compare against the model that contains parameters for both risk and ambiguity?
+1.  The BIC is most useful for comparing the likelihoods of competing models, and assessing which of those models best fits the data. To make this concrete, try specifying an objective function that only models risk preference, not ambiguity preference. Estimate parameters for this model using subject 9's data, then calculate the BIC. How does the risk-only model compare against the model that contains parameters for both risk and ambiguity?
 
-2. Your friend argues that when performing model selection between competing models, you should always favor the model with the lowest BIC. Your friend argues that it is an unbiased, quantitative, and fair method that prevents researchers from cherry-picking models that they happen to like (e.g. because those models favor their hypothesis). In what ways do you agree or disagree with your friend, and how would you respond to their argument?
-
+2.  Your friend argues that when performing model selection between competing models, you should always favor the model with the lowest BIC. Your friend argues that it is an unbiased, quantitative, and fair method that prevents researchers from cherry-picking models that they happen to like (e.g. because those models favor their hypothesis). In what ways do you agree or disagree with your friend, and how would you respond to their argument?
 
 ## Posterior predictive check
 
@@ -483,12 +479,12 @@ behav %>%
 
 ### Exercises: PPC
 
-1. Qualitatively, what did the model get right about subject 9's behavior? What did it miss? And what does this PPC suggest about *why* the model got some things wrong?
+1.  Qualitatively, what did the model get right about subject 9's behavior? What did it miss? And what does this PPC suggest about *why* the model got some things wrong?
 
-2. Compute the BICs for subjects 2, 4, and 9. What does this summary statistic suggest about how well the model explains data?
+2.  Compute the BICs for subjects 2, 4, and 9. What does this summary statistic suggest about how well the model explains data?
 
-3. Based on this knowledge, consider the parameter estimates for each of your subjects. At face value, what simulated behaviors do you expect to see, given those parameters?
+3.  Based on this knowledge, consider the parameter estimates for each of your subjects. At face value, what simulated behaviors do you expect to see, given those parameters?
 
-4. Now examine the PPC for subjects 2 and 4. What do you observe? Does this PPC tell you something important that would otherwise be hard to observe from the summary statistics / model estimates alone?
+4.  Now examine the PPC for subjects 2 and 4. What do you observe? Does this PPC tell you something important that would otherwise be hard to observe from the summary statistics / model estimates alone?
 
-5. Consider this: is there a way of anticipating which subjects might not be fit well by the model, before running the model? What does that tell you about the importance of understanding both the computational model, and the behavior that informs it?
+5.  Consider this: is there a way of anticipating which subjects might not be fit well by the model, before running the model? What does that tell you about the importance of understanding both the computational model, and the behavior that informs it?

@@ -1,15 +1,17 @@
 ---
 title: "Expected value"
-subtitle: "Session 1-1"
 author: "Jae-Young Son"
 date: "February 21, 2022"
 output:
+  word_document:
+    toc: yes
   html_document:
-    code_download: true
+    code_download: yes
     code_folding: show
-    toc: true
+    toc: yes
     toc_float:
-      collapsed: false
+      collapsed: no
+subtitle: "Session 1-1"
 ---
 
 # Setup
@@ -27,7 +29,6 @@ suppressMessages(library(here))
 source(here("tutorial_code", "utils.R"))
 ```
 
-
 # Expected value
 
 According to classic economic theory, people should make decisions based on the options' ***expected value***. For example, when I'm in the mood for Mexican food, I derive a lot of happiness out of ordering nachos or burritos from Baja's Taqueria. However, I'm more often in the mood for nachos than burritos. Therefore, I might have some expectation about the value I'd derive from ordering either nachos or burritos, and I should this expectation to guide my choices.
@@ -37,7 +38,6 @@ What would it look like to quantify this set of qualitative preferences? We coul
 Okay, let's work through a concrete example. We could say that I derive 10 happy units from eating burritos, in the event that I'm in the right mood for it. However, I'm only in the mood for burritos 30% of the time. If you bought me a burrito without knowing what mood I'm in, you would expect that on average, the value of the burrito would be $10 \times 0.3 = 3$ happy units.
 
 I might, on the other hand, derive 5 happy units from eating nachos, when I'm in the mood. Naively, that suggests that I might like burritos more than nachos. However, I'm in the mood for nachos 80% of the time. This makes the expected value of nachos $5 \times 0.8 = 4$ happy units.
-
 
 # Choice rules
 
@@ -65,9 +65,13 @@ We can make a simple modification to our naive equation to make sure that this h
 
 ## Exercises: Exponential functions
 
-1. Using the R function `exp`, try calculating $e^x$, where $x = [-5, 5]$. What do you notice, particularly when $x$ is negative or $0$? Note that the choice of $e$ as the base is more-or-less arbitrary, but that's the accepted convention in all of the softmax models I've ever encountered.
+1.  Using the R function `exp`, try calculating $e^x$, where $x = [-5, 5]$. What do you notice, particularly when $x$ is negative or $0$? Note that the choice of $e$ as the base is more-or-less arbitrary, but that's the accepted convention in all of the softmax models I've ever encountered.
 
-2. Use `ggplot` to graph this curve.
+```{r}
+plot(exp(-5:5))
+```
+
+2.  Use `ggplot` to graph this curve.
 
 ## General softmax equation
 
@@ -81,18 +85,37 @@ $$p(choose \space x_i) = \Large{\frac{e^{x_i}}{\sum_{j=1}^{K} e^{x_j}}} \tag{1.1
 
 To translate that back into our food example, $x_i$ refers to choosing the option $i=nachos$, and the summation $\sum$ in the denominator starts with option $j=1=nachos$, and sums over all other options $j=2=burrito$, $j=3=quesadilla$, until you reach the total number of options $K$.
 
-
 # Exercises
 
-1. Confirm for yourself that the probability of me choosing nachos over burritos is ~73%, given that $EV_{nachos} = 4$ and $EV_{burrito} = 3$.
+1.  Confirm for yourself that the probability of me choosing nachos over burritos is \~73%, given that $EV_{nachos} = 4$ and $EV_{burrito} = 3$.
 
-2. Write a custom function implementing the softmax function. It should output a single probability of choosing a given option. As input, you should specify a vector of values (e.g., expected values), and also the index of the option being chosen. If you need a sanity check, make sure that your custom function gives you the same answer as exercise 1.
+    ```{r}
+    exp(4)/(exp(4) + exp(3))
+    ```
 
-3. Assume that $EV_{quesadillas} = -2$ for me. How does this change the probability of me choosing nachos? Then, let's throw some tacos into the mix for good measure, which have $EV_{tacos} = 1$.
+2.  Write a custom function implementing the softmax function. It should output a single probability of choosing a given option. As input, you should specify a vector of values (e.g., expected values), and also the index of the option being chosen. If you need a sanity check, make sure that your custom function gives you the same answer as exercise 1.
 
-4. Let's imagine for a second that we scale all of our expected values by a factor of $10$, such that $EV_{nachos} = 40$ and $EV_{burrito} = 30$. What is your expectation about how this should affect the probability of me preferring nachos over burritos? Now use your function to compute the actual probability. What happened? Can you think through reasons why this has happened?
+    ```{r}
+    my_softmax <- function(option_values , option_chosen){
+      exp(option_values[option_chosen])/ sum(exp(option_values))
+    }
 
-5. Building on exercise 4, let's try plotting the probability of choosing nachos over burritos, as the expected values of nachos and burritos change. Below is an example heatmap, where the range of expected values for each option ranges from $x \in [-2, 2]$. Try recreating this heatmap plot, and then expand it out to the range $x \in [-5, 5]$. What do we learn from this? In exercise 4, why did you observe the pattern of results you did? Hint: It may help you to check out the documentation for `tidyr::expand_grid`.
+    my_softmax(c(4,3), 1)
+    ```
+
+3.  Assume that $EV_{quesadillas} = -2$ for me. How does this change the probability of me choosing nachos? Then, let's throw some tacos into the mix for good measure, which have $EV_{tacos} = 1$.
+
+    ```{r}
+    my_softmax(c(4,3,-2,1),4)
+    ```
+
+4.  Let's imagine for a second that we scale all of our expected values by a factor of $10$, such that $EV_{nachos} = 40$ and $EV_{burrito} = 30$. What is your expectation about how this should affect the probability of me preferring nachos over burritos? Now use your function to compute the actual probability. What happened? Can you think through reasons why this has happened?
+
+    ```{r}
+    my_softmax(c(40,30),1)
+    ```
+
+5.  Building on exercise 4, let's try plotting the probability of choosing nachos over burritos, as the expected values of nachos and burritos change. Below is an example heatmap, where the range of expected values for each option ranges from $x \in [-2, 2]$. Try recreating this heatmap plot, and then expand it out to the range $x \in [-5, 5]$. What do we learn from this? In exercise 4, why did you observe the pattern of results you did? Hint: It may help you to check out the documentation for `tidyr::expand_grid`.
 
 ```{r example-heatmap}
 #| echo = FALSE,
@@ -100,12 +123,12 @@ To translate that back into our food example, $x_i$ refers to choosing the optio
 #| warnings = FALSE
 
 expand_grid(
-  nacho_value = -2:2,
-  burrito_value = -2:2
+  nacho_value = -5:5,
+  burrito_value = -5:5
 ) %>%
   rowwise() %>%
   mutate(
-    p_nacho = softmax(
+    p_nacho = my_softmax(
       option_values = c(nacho_value, burrito_value),
       option_chosen = 1
     )
@@ -117,7 +140,7 @@ expand_grid(
   coord_fixed()
 ```
 
-6. This is an exercise with a long exposition...
+6.  This is an exercise with a long exposition...
 
 As humans, we might have a psychological feeling that "scaling" all values (e.g., multiplying by a constant, as we did in exercise 4) should not greatly change our preference for a given option over another. And yet, that is exactly what we observed in exercise 4. In exercise 5, we got a better mathematical sense for why this happened. This illustrates the importance of being thoughtful about what kinds of values you're passing into a given choice function (like the softmax), and to have a sense for how the choice function will mathematically react to different kinds of values that we as humans psychologically think of as being the same. If the "raw" values being passed into the softmax are quite large (or quite small), you may want to consider re-scaling them into a range where the softmax is "better-behaved."
 
@@ -127,20 +150,73 @@ $$p(choose \space x_i) = \Large{\frac{e^{x_i / \tau}}{\sum_{j=1}^{K} e^{x_j / \t
 
 Try modifying your softmax function so that it takes another input for temperature, which is then used to scale the raw values. If a temperature argument is not provided by the user, then set the default temperature to one.
 
+```{r}
+my_new_softmax <- function(option_values , option_chosen, temperature = 1){
+  exp(option_values[option_chosen]/temperature)/ sum(exp(option_values/temperature))
+}
+```
+
 Now, re-plot your heatmap from exercise 5. What happens as the temperature increases? What happens as the temperature decreases to near-zero? Here are some common ways of describing the temperature parameter: it makes an agent more-or-less "noisy" or "random" of a decision-maker; it makes an agent more-or-less "sensitive" to value differences; it makes an agent more or less "exploratory" in how they make decisions. All of these descriptions are true and valid, and conceptually useful in different ways, for different contexts.
 
-7. In exercise 4, let's say you didn't want to scale your values before passing them to the softmax. How could you accordingly adjust your softmax temperature to achieve the same answer as you did in exercise 1?
+```{r}
+expand_grid(
+  nacho_value = -5:5,
+  burrito_value = -5:5
+) %>%
+  rowwise() %>%
+  mutate(
+    p_nacho = my_new_softmax(
+      option_values = c(nacho_value, burrito_value),
+      option_chosen = 1,
+      #Scaling it so that they are smaller than they actually are
+      temperature = 3
+    )
+  ) %>%
+  ungroup() %>%
+  ggplot(aes(x=nacho_value, y=burrito_value, fill=p_nacho)) +
+  geom_tile() +
+  scale_fill_viridis_c(limits = c(0, 1)) +
+  coord_fixed()
 
-8. Let's say a friend of yours researches how ADHD affects how randomly people make choices, with the general hypothesis that people with ADHD make decisions more randomly. In one of her past studies, a sample of control subjects performed a food preference task. In a *different* past study, she recruited a group of ADHD-diagnosed subjects to perform a gambling task. Due to the pandemic, she is having trouble collecting new data, and therefore wants to use computational modeling to re-analyze some of her old data. When she fits her choice models, she finds that subjects in the ADHD group have a greater estimated temperature parameter than subjects in the control group. She claims that these modeling results support her hypothesis. Do you agree with her? Why or why not?
+```
 
-9. At this point, you've created a nice function for passing values through a softmax function. We'd like to be able to re-use this function in the future. Create a new R script where you define your custom softmax function, and save it as `code/utils.R`. Restart R (in RStudio, you can click `Session >> Restart R` to do this without quitting the program entirely). Assuming that you've cloned this repository from GitHub, you should now be able to run the following code to load your custom function back into your environment. To verify that it works, try re-running your code from exercise 5.
+```{r}
+expand_grid(
+  nacho_value = -5:5,
+  burrito_value = -5:5
+) %>%
+  rowwise() %>%
+  mutate(
+    p_nacho = my_new_softmax(
+      option_values = c(nacho_value, burrito_value),
+      option_chosen = 1,
+      temperature = .1
+    )
+  ) %>%
+  ungroup() %>%
+  ggplot(aes(x=nacho_value, y=burrito_value, fill=p_nacho)) +
+  geom_tile() +
+  scale_fill_viridis_c(limits = c(0, 1)) +
+  coord_fixed()
+```
+
+7.  In exercise 4, let's say you didn't want to scale your values before passing them to the softmax. How could you accordingly adjust your softmax temperature to achieve the same answer as you did in exercise 1?
+
+    ```{r}
+    my_new_softmax(c(40, 30), 1, 10)
+    ```
+
+8.  Let's say a friend of yours researches how ADHD affects how randomly people make choices, with the general hypothesis that people with ADHD make decisions more randomly. In one of her past studies, a sample of control subjects performed a food preference task. In a *different* past study, she recruited a group of ADHD-diagnosed subjects to perform a gambling task. Due to the pandemic, she is having trouble collecting new data, and therefore wants to use computational modeling to re-analyze some of her old data. When she fits her choice models, she finds that subjects in the ADHD group have a greater estimated temperature parameter than subjects in the control group. She claims that these modeling results support her hypothesis. Do you agree with her? Why or why not?
+
+    Yes. there's more variabile when you increase temperature. They are more sensitivit
+
+9.  At this point, you've created a nice function for passing values through a softmax function. We'd like to be able to re-use this function in the future. Create a new R script where you define your custom softmax function, and save it as `code/utils.R`. Restart R (in RStudio, you can click `Session >> Restart R` to do this without quitting the program entirely). Assuming that you've cloned this repository from GitHub, you should now be able to run the following code to load your custom function back into your environment. To verify that it works, try re-running your code from exercise 5.
 
 ```{r load-custom-function}
 #| eval = FALSE
 
 source(here("code", "utils.R"))
 ```
-
 
 # Next time...
 

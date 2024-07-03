@@ -118,9 +118,30 @@ Now, the definition of utility explicitly is understood to depend on some inputs
 
 Now it's your turn: try implementing this equation as a custom function called `compute_utility_risk_amb`. As you do so, think about ways in which a user might mistakenly misuse your function.
 
-1. A common mistake might be a user specifying that (e.g.) the probability of winning is 75, rather than 0.75. Have your function check for things of this nature, and `stop` execution if the user input is incorrect.
+1.  A common mistake might be a user specifying that (e.g.) the probability of winning is 75, rather than 0.75. Have your function check for things of this nature, and `stop` execution if the user input is incorrect.
 
-2. If the user specifies a non-zero amount of ambiguity, have your function check to make sure that the probability of winning is set to 50%. If this condition is not met, return a `warning` and change it to 50%.
+    ```{r}
+    compute_utility_risk_amb <- function(alpha, beta, value, prob, ambiguity){
+      if (!between(prob, 0, 1) | !between(ambiguity, 0, 1)){
+        stop("The gamble risk/ambiguity must fall between [0,1]")
+      }
+      
+      if(ambiguity != 0 & prob !=.50){
+        warning("Non-zero ambiguity level specified. Risk level changed to 50%.")
+        gamble_win_prob <- 0.5
+      }
+      utility <- (value^(alpha)) * (prob + ((beta * ambiguity)/2))
+      return(utility)
+      
+      
+    }
+    ```
+
+2.  If the user specifies a non-zero amount of ambiguity, have your function check to make sure that the probability of winning is set to 50%. If this condition is not met, return a `warning` and change it to 50%.
+
+    ```{r}
+
+    ```
 
 Try checking the output of your function against mine:
 
@@ -194,11 +215,11 @@ To get a better handle on how $\alpha$ and $\beta$ affect utility, let's see wha
 
 First, let's simulate how $\alpha$ affects utility during risky gambles. Use the following parameter space:
 
-- Keep the gamble value fixed at \$100
-- Risk levels 25%, 50%, and 75%
-- Ambiguity levels should be fixed at 0%
-- $\alpha \in [-0.5, 1.2]$ in steps of 0.01.
-- The value of $\beta$ can be fixed at any arbitrary value. Self-test: why?
+-   Keep the gamble value fixed at \$100
+-   Risk levels 25%, 50%, and 75%
+-   Ambiguity levels should be fixed at 0%
+-   $\alpha \in [-0.5, 1.2]$ in steps of 0.01.
+-   The value of $\beta$ can be fixed at any arbitrary value. Self-test: why?
 
 Hint: You will likely get some cryptic errors to this effect: `the condition has length > 1 and only the first element will be used`. Why are you getting this error? Try looking up the documentation for `dplyr::rowwise`. Why does using this function silence the error message?
 
@@ -256,21 +277,25 @@ expand_grid(
 
 Once you generate your full output, try answering the following questions:
 
-1. Recall that a risk-neutral agent has $\alpha = 1$, and therefore computes utility according to expected value. Is this true in your simulation?
+1.  Recall that a risk-neutral agent has $\alpha = 1$, and therefore computes utility according to expected value. Is this true in your simulation?
 
-2. Mathematically, the value of $\alpha$ can be any real number. However, things that are mathematically possible aren't always psychologically plausible. What does this simulation indicate about what parameter values will be most "interesting" for explaining how an agent computes utility?
+2.  Mathematically, the value of $\alpha$ can be any real number. However, things that are mathematically possible aren't always psychologically plausible. What does this simulation indicate about what parameter values will be most "interesting" for explaining how an agent computes utility?
 
-3. What happens to utility when $\alpha > 1$? Why does this happen, mathematically? What would this parameter value say about someone's psychology, if taken at face value? Should we take it at face value?
+3.  What happens to utility when $\alpha > 1$? Why does this happen, mathematically? What would this parameter value say about someone's psychology, if taken at face value? Should we take it at face value?
 
 ## Exercise: Utility under ambiguity
 
 Now, let's simulate how $\beta$ affects utility during ambiguous gambles using the following parameter space:
 
-- Fix the gamble value at \$100
-- Risk levels should now be fixed at 50%
-- Ambiguity levels 25%, 50%, and 75%
-- $\alpha \in [0.5, 1]$ in steps of 0.01
-- $\beta \in [-2, 2]$ in steps of 0.01
+-   Fix the gamble value at \$100
+
+-   Risk levels should now be fixed at 50%
+
+-   Ambiguity levels 25%, 50%, and 75%
+
+-   $\alpha \in [0.5, 1]$ in steps of 0.01
+
+-   $\beta \in [-2, 2]$ in steps of 0.01
 
 ```{r amb-util-sol}
 #| eval = FALSE
@@ -328,13 +353,13 @@ expand_grid(
 
 Once you plot the full parameter space, answer the following questions:
 
-1. What would it look like for an agent to be totally risk- and ambiguity-neutral? Does your simulation verify your reasoning?
+1.  What would it look like for an agent to be totally risk- and ambiguity-neutral? Does your simulation verify your reasoning?
 
-2. Like before, the value of $\beta$ can be any real number. But just as before, this doesn't always make psychological sense. What range of parameter values (now *both* $\alpha$ and $\beta$) do we get the most psychological traction?
+2.  Like before, the value of $\beta$ can be any real number. But just as before, this doesn't always make psychological sense. What range of parameter values (now *both* $\alpha$ and $\beta$) do we get the most psychological traction?
 
 # Simulating behavior
 
-Alright, now we're ready to simulate choice behavior. On every trial, a participant is presented with a choice between a sure $5, versus an uncertain gamble with varying risk and ambiguity. Let's see how different combinations of task parameters affect decisions.
+Alright, now we're ready to simulate choice behavior. On every trial, a participant is presented with a choice between a sure \$5, versus an uncertain gamble with varying risk and ambiguity. Let's see how different combinations of task parameters affect decisions.
 
 At this point, we'll need to draw upon the softmax function we wrote last time. You'll note that we're juggling a *lot* of parameters already, and now we're adding a softmax temperature parameter on top of everything else. We'll have to be wise in how we simulate and plot data, to avoid getting overwhelmed.
 
@@ -346,10 +371,10 @@ Compute the utility as before. Then, pass those utility values to the softmax, w
 
 Use the following parameter space:
 
-- Gamble values ranging from \$0-\$100 in increments of \$1
-- Risk levels 25%, 50%, and 75%
-- $\alpha \in [0.5, 1]$ in increments of 0.1
-- $\tau = 1$
+-   Gamble values ranging from \$0-\$100 in increments of \$1
+-   Risk levels 25%, 50%, and 75%
+-   $\alpha \in [0.5, 1]$ in increments of 0.1
+-   $\tau = 1$
 
 ```{r risk-behav-sol}
 expand_grid(
@@ -377,7 +402,7 @@ expand_grid(
   ) %>%
   ggplot(aes(x=gamble_value, y=p_gamble, color=gamble_win_prob)) +
   facet_wrap(~agent_alpha) +
-  geom_line(size = 1) +
+  geom_line(linewidth = 1) +
   scale_color_viridis_d(option = "plasma", end = 0.8)
 ```
 
@@ -415,13 +440,13 @@ expand_grid(
 
 Create a plot of the full parameter space, then answer the following questions:
 
-1. Consider an agent with $\alpha = 0.5$, who is deciding between a sure \$5 and a gamble with 75% risk (i.e., 25% chance of winning). At approximately what dollar amount does this agent consider these options to be equivalent?
+1.  Consider an agent with $\alpha = 0.5$, who is deciding between a sure \$5 and a gamble with 75% risk (i.e., 25% chance of winning). At approximately what dollar amount does this agent consider these options to be equivalent?
 
-2. What happens to an agent's choices as its risk tolerance increases? Consider the ***midpoint*** location (i.e., the gamble value at which the two options are equivalent), and also the ***slope*** (i.e., the steepness of the curve).
+2.  What happens to an agent's choices as its risk tolerance increases? Consider the ***midpoint*** location (i.e., the gamble value at which the two options are equivalent), and also the ***slope*** (i.e., the steepness of the curve).
 
-3. Consider the probability of winning a gamble. Obviously, 50% is numerically right in the middle between 25% and 75%. To what extent is this reflected in your simulation? Why?
+3.  Consider the probability of winning a gamble. Obviously, 50% is numerically right in the middle between 25% and 75%. To what extent is this reflected in your simulation? Why?
 
-4. Try changing the softmax temperature to values that are above and below 1. What happens?
+4.  Try changing the softmax temperature to values that are above and below 1. What happens?
 
 ## Exercise: Behavior under ambiguity
 
@@ -429,11 +454,11 @@ Now we want to know the probability of an agent choosing an ambiguous gamble.
 
 Use the following parameter space:
 
-- Gamble values ranging from \$0-\$100 in increments of \$1
-- Ambiguity levels 25%, 50%, and 75%
-- $\alpha \in [0.5, 1]$ in increments of 0.1
-- $\beta \in [-1, 1]$ in increments of 0.5
-- $\tau = 1$
+-   Gamble values ranging from \$0-\$100 in increments of \$1
+-   Ambiguity levels 25%, 50%, and 75%
+-   $\alpha \in [0.5, 1]$ in increments of 0.1
+-   $\beta \in [-1, 1]$ in increments of 0.5
+-   $\tau = 1$
 
 ```{r amb-behav-sol}
 #| eval = FALSE
@@ -453,7 +478,7 @@ expand_grid(
     p_gamble = softmax(
       option_values = c(utility, 5),
       option_chosen = 1,
-      temperature = 2
+      temperature = 1
     )
   ) %>%
   ungroup() %>%
@@ -514,13 +539,50 @@ expand_grid(
 
 After creating a plot of the full parameter space, answer the following questions:
 
-1. It can be overwhelming trying to consider all of the data at once. For now, focus on a single row (i.e., keep $\alpha$ fixed). At what value of $\beta$ is an agent ambiguity-neutral? What happens to choice as an agent becomes more ambiguity-averse, and as an agent becomes more ambiguity-seeking?
+1.  It can be overwhelming trying to consider all of the data at once. For now, focus on a single row (i.e., keep $\alpha$ fixed). At what value of $\beta$ is an agent ambiguity-neutral? What happens to choice as an agent becomes more ambiguity-averse, and as an agent becomes more ambiguity-seeking?
 
-2. Now, focus on a single column (i.e., keep $\beta$ fixed). Given our risk simulations in the previous exercise, what do you expect will happen to the choice curve as $\alpha$ increases? Is your prediction correct?
+2.  Now, focus on a single column (i.e., keep $\beta$ fixed). Given our risk simulations in the previous exercise, what do you expect will happen to the choice curve as $\alpha$ increases? Is your prediction correct?
 
-3. Based on the previous exercise, what do you expect will happen as you adjust the softmax temperature? Try it now. Were your predictions correct?
+3.  Based on the previous exercise, what do you expect will happen as you adjust the softmax temperature? Try it now. Were your predictions correct?
 
-4. Note that modeling risk behaviors only required a single parameter to capture uncertainty preference, whereas modeling ambiguity behaviors requires two. This is sensible enough given the experimental task. However, as psychologists, we are of course interested in knowing whether our measures generalize beyond the immediate context of a particular task. What do you think of this particular model as a general model for measuring uncertainty preferences?
+    ```{r}
+    expand_grid(
+      gamble_value = 0:100,
+      gamble_win_prob = 0.5,
+      gamble_amb = seq(0.25, 0.75, 0.25),
+      agent_alpha = seq(0.5, 1, 0.1),
+      agent_beta = seq(-1, 1, 0.5)
+    ) %>%
+      rowwise() %>%
+      mutate(
+        utility = compute_utility_risk_amb(
+          agent_alpha, agent_beta, gamble_value, gamble_win_prob, gamble_amb
+        ),
+        p_gamble = softmax(
+          option_values = c(utility, 5),
+          option_chosen = 1,
+          temperature = 2
+        )
+      ) %>%
+      ungroup() %>%
+      mutate(
+        agent_alpha = str_c("alpha = ", agent_alpha),
+        agent_beta = str_c("beta = ", agent_beta),
+        agent_beta = fct_relevel(
+          agent_beta, "beta = -1", "beta = -0.5"
+        ),
+        gamble_amb = factor(gamble_amb)
+      ) %>%
+      ggplot(aes(x=gamble_value, y=p_gamble, color=gamble_amb)) +
+      facet_grid(
+        rows = vars(agent_alpha),
+        cols = vars(agent_beta)
+      ) +
+      geom_line(size = 1) +
+      scale_color_viridis_d(option = "plasma", end = 0.8)
+    ```
+
+4.  Note that modeling risk behaviors only required a single parameter to capture uncertainty preference, whereas modeling ambiguity behaviors requires two. This is sensible enough given the experimental task. However, as psychologists, we are of course interested in knowing whether our measures generalize beyond the immediate context of a particular task. What do you think of this particular model as a general model for measuring uncertainty preferences?
 
 # Next time...
 
